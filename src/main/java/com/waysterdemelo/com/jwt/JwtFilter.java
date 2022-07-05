@@ -2,6 +2,10 @@ package com.waysterdemelo.com.jwt;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -39,7 +43,32 @@ public class JwtFilter extends OncePerRequestFilter {
                 claims = jwtUtil.extractAllClaims(token);
             }
 
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                UserDetails userDetails = customerUserDetailsService.loadUserByUsername(username);
 
+                if (jwtUtil.validateToken(token, userDetails)){
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                            new UsernamePasswordAuthenticationToken(userDetails,null, userDetails.getAuthorities());
+                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
+
+            }
+
+            filterChain.doFilter(request, response);
        }
+    }
+
+
+    public Boolean isAdmin(){
+        return "admin".equalsIgnoreCase((String) claims.get("role"));
+    }
+
+    public Boolean isUser(){
+        return "user".equalsIgnoreCase((String) claims.get("role"));
+    }
+
+    public String getCurrentUser(){
+        return username;
     }
 }
