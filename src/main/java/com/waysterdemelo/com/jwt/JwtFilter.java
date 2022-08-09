@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,14 +30,14 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-       if (request.getServletPath().matches("/user/login|/user/forgotpassword|/user/signup")){
+       if (request.getServletPath().matches("/users/login|/users/forgotpassword|/users/signup")){
             filterChain.doFilter(request, response);
         }else {
             String authorization = request.getHeader("Authorization");
             String token = null;
 
             if (authorization != null && authorization.startsWith("Bearer ")){
-                token = token.substring(7);
+                token = authorization.substring(7);
                 username = jwtUtil.extractUserName(token);
                 claims = jwtUtil.extractAllClaims(token);
             }
@@ -58,7 +57,6 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
        }
     }
-
 
     public Boolean isAdmin(){
         return "admin".equalsIgnoreCase((String) claims.get("role"));

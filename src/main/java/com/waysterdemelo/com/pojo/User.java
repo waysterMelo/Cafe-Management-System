@@ -6,12 +6,13 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 
+@NamedQuery(name = "User.findByEmailId", query = "select u from User u where u.email=:email")
+
 @Data
 @Entity
 @DynamicUpdate
 @DynamicInsert
 @Table(name = "user")
-@NamedQuery(name = "User.findByEmailId", query = "select u from User u where u.email = :email")
 public class User {
 
     private static final Long serialVersionUID = 1L;
